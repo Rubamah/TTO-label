@@ -1,130 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Queue Label System</title>
-
-<style>
-body {
-  font-family: Arial;
-  text-align: center;
-}
-
-/* TABS */
-.tab { display: none; }
-.active { display: block; }
-
-/* INPUTS */
-input {
-  padding: 8px;
-  margin: 5px;
-  width: 200px;
-  font-size: 16px;
-}
-
-button {
-  padding: 10px;
-  margin: 5px;
-  cursor: pointer;
-}
-
-/* ===== LABEL ===== */
-#label {
-  width: 90mm;
-  height: 55mm;
-  padding: 4mm;
-  box-sizing: border-box;
-  text-align: center;
-
-  /* 🔥 compensate your printer offset */
-  transform: translateX(14mm);
-}
-
-/* CONTENT */
-.title {
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.queue {
-  font-size: 48px;
-  font-weight: 900;
-  margin: 4px 0;
-}
-
-.mrn {
-  font-size: 14px;
-}
-
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #label, #label * {
-    visibility: visible;
-  }
-  #label {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<h3>Queue System</h3>
-
-<button onclick="openTab('noMRN')">No MRN</button>
-<button onclick="openTab('withMRN')">With MRN</button>
-
-<!-- NO MRN -->
-<div id="noMRN" class="tab active">
-  <input type="number" id="q1" placeholder="Queue Number">
-  <br>
-  <button onclick="nextNoMRN()">Next & Print</button>
-</div>
-
-<!-- WITH MRN -->
-<div id="withMRN" class="tab">
-  <input type="number" id="q2" placeholder="Queue Number">
-  <br>
-  <input type="text" id="mrn" placeholder="MRN (Required)">
-  <br>
-  <button onclick="printMRN()">Print</button>
-  <button onclick="nextMRN()">Next</button>
-</div>
-
-<!-- LABEL -->
-<div id="label">
-  <div class="title">Patient is here</div>
-  <div class="queue" id="printQueue"></div>
-  <div class="mrn" id="printMRN"></div>
-</div>
-
 <script>
+let lastPrinted = null;
+
+// SWITCH TABS
 function openTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(tab).classList.add('active');
 }
 
+// PRINT CORE
 function printLabel(q, m="") {
   document.getElementById("printQueue").innerText = q;
   document.getElementById("printMRN").innerText = m ? "MRN: " + m : "";
   window.print();
+  lastPrinted = parseInt(q);
 }
 
-/* NO MRN */
+/* =========================
+   NO MRN TAB
+========================= */
+
+// FIRST PRINT (manual start)
+function printNoMRN() {
+  let q = document.getElementById("q1").value;
+  if (!q) return alert("Enter queue");
+
+  printLabel(q);
+}
+
+// NEXT (auto print next number)
 function nextNoMRN() {
-  let q = document.getElementById("q1");
-  if (!q.value) return alert("Enter queue");
+  if (lastPrinted === null) {
+    return alert("Press Print first");
+  }
 
-  printLabel(q.value);
-  q.value = parseInt(q.value) + 1;
+  let next = lastPrinted + 1;
+  printLabel(next);
+
+  document.getElementById("q1").value = next;
 }
 
-/* WITH MRN */
+/* =========================
+   MRN TAB
+========================= */
+
+// PRINT ONLY
 function printMRN() {
   let q = document.getElementById("q2").value;
   let m = document.getElementById("mrn").value;
@@ -134,18 +53,16 @@ function printMRN() {
   printLabel(q, m);
 }
 
+// NEXT (NO PRINT)
 function nextMRN() {
-  let q = document.getElementById("q2");
-  let m = document.getElementById("mrn");
+  let qField = document.getElementById("q2");
+  let mField = document.getElementById("mrn");
 
-  if (!q.value || !m.value) return alert("MRN required");
+  if (!qField.value) return alert("Enter queue first");
 
-  printLabel(q.value, m.value);
+  let next = parseInt(qField.value) + 1;
 
-  q.value = parseInt(q.value) + 1;
-  m.value = "";
+  qField.value = next;
+  mField.value = "";
 }
 </script>
-
-</body>
-</html>
