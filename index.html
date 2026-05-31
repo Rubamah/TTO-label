@@ -11,8 +11,13 @@ body {
 }
 
 /* TABS */
-.tab { display: none; }
-.active { display: block; }
+.tab {
+  display: none;
+}
+
+.active {
+  display: block;
+}
 
 /* INPUTS */
 input {
@@ -35,8 +40,6 @@ button {
   padding: 4mm;
   box-sizing: border-box;
   text-align: center;
-
-  /* SAFE OFFSET (no crash) */
   margin-left: 14mm;
 }
 
@@ -55,13 +58,33 @@ button {
   font-size: 14px;
 }
 
+/* LIST TAB */
+#mrnList {
+  margin-top: 20px;
+}
+
+.mrn-item {
+  color: green;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 8px;
+}
+
+.mrn-item.done {
+  color: black;
+}
+
 @media print {
   body * {
     visibility: hidden;
   }
-  #label, #label * {
+
+  #label,
+  #label * {
     visibility: visible;
   }
+
   #label {
     position: absolute;
     top: 0;
@@ -77,6 +100,7 @@ button {
 
 <button onclick="openTab('noMRN')">No MRN</button>
 <button onclick="openTab('withMRN')">With MRN</button>
+<button onclick="openTab('list')">List</button>
 
 <!-- NO MRN -->
 <div id="noMRN" class="tab active">
@@ -96,6 +120,17 @@ button {
   <button onclick="nextMRN()">Next</button>
 </div>
 
+<!-- LIST -->
+<div id="list" class="tab">
+  <h3>MRN List</h3>
+
+  <input type="text" id="listMRN" placeholder="Enter MRN">
+  <br>
+  <button onclick="addMRNToList()">Add MRN</button>
+
+  <div id="mrnList"></div>
+</div>
+
 <!-- LABEL -->
 <div id="label">
   <div class="title">Patient is here</div>
@@ -113,7 +148,7 @@ function openTab(tab) {
 }
 
 // PRINT CORE
-function printLabel(q, m="") {
+function printLabel(q, m = "") {
   document.getElementById("printQueue").innerText = q;
   document.getElementById("printMRN").innerText = m ? "MRN: " + m : "";
   window.print();
@@ -126,29 +161,39 @@ function printLabel(q, m="") {
 
 function printNoMRN() {
   let q = document.getElementById("q1").value;
-  if (!q) return alert("Enter queue");
+
+  if (!q) {
+    alert("Enter queue");
+    return;
+  }
 
   printLabel(q);
 }
 
 function nextNoMRN() {
-  if (lastPrinted === null) return alert("Print first");
+  if (lastPrinted === null) {
+    alert("Print first");
+    return;
+  }
 
   let next = lastPrinted + 1;
-  printLabel(next);
 
+  printLabel(next);
   document.getElementById("q1").value = next;
 }
 
 /* ======================
-   MRN
+   WITH MRN
 ====================== */
 
 function printMRN() {
   let q = document.getElementById("q2").value;
   let m = document.getElementById("mrn").value;
 
-  if (!q || !m) return alert("MRN required");
+  if (!q || !m) {
+    alert("MRN required");
+    return;
+  }
 
   printLabel(q, m);
 }
@@ -157,12 +202,42 @@ function nextMRN() {
   let qField = document.getElementById("q2");
   let mField = document.getElementById("mrn");
 
-  if (!qField.value) return alert("Enter queue first");
+  if (!qField.value) {
+    alert("Enter queue first");
+    return;
+  }
 
   let next = parseInt(qField.value) + 1;
 
   qField.value = next;
   mField.value = "";
+}
+
+/* ======================
+   MRN LIST
+====================== */
+
+function addMRNToList() {
+  let field = document.getElementById("listMRN");
+  let mrn = field.value.trim();
+
+  if (!mrn) {
+    alert("Enter MRN");
+    return;
+  }
+
+  let item = document.createElement("div");
+
+  item.className = "mrn-item";
+  item.innerText = mrn;
+
+  item.onclick = function() {
+    item.classList.toggle("done");
+  };
+
+  document.getElementById("mrnList").appendChild(item);
+
+  field.value = "";
 }
 </script>
 
